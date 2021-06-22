@@ -19,15 +19,15 @@ constexpr packet_t (enpack) (_Value_Type type)
 }
 
 template<typename _Value_Type>
-constexpr _Value_Type (unpackc) (packetc_t type)
+constexpr _Value_Type* (unpackc) (packetc_t type)
 {
-	return reinterpret_cast<_Value_Type>(type);
+	return reinterpret_cast<_Value_Type*>(type);
 }
 
 template<typename _Value_Type>
-constexpr _Value_Type (unpack) (packet_t type)
+constexpr _Value_Type* (unpack) (packet_t type)
 {
-	return reinterpret_cast<_Value_Type>(type);
+	return reinterpret_cast<_Value_Type*>(type);
 }
 
 _VIL_END
