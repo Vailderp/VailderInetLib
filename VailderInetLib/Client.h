@@ -18,15 +18,15 @@
 #pragma warning( disable: 4996 )
 
 _VIL_BEGIN
-enum class SocketError
+enum class ClientError
 {
-	SOCKET_CONNECTED,
-	SERVER_INIT
+	SOCKET_CONNECT,
+	SOCKET_INIT
 };
 _VIL_END
 
 _VIL_BEGIN
-class Client
+class Client : public _VIL StatesDynamic
 {
 private:
 	const u_short hostshort_;
@@ -35,17 +35,17 @@ private:
 	_VIL Socket socket_;
 
 public:
-	explicit Client(const u_short hostshort = 7070, const char* inet_address = "127.0.0.1");
+	explicit VIL_API Client(const u_short hostshort = 7070, const char* inet_address = "127.0.0.1");
 
-	~Client();
+	VIL_API ~Client();
 
-	virtual void on(packetc_t packet, Socket socket) = 0;
+	virtual void on(packetc_t packet) = 0;
 
-	virtual void onConnection(Socket socket) = 0;
+	virtual void onConnection() = 0;
 
-	virtual void onDisconnection(Socket socket) = 0;
+	virtual void onDisconnection() = 0;
 
-	virtual void onError(SocketError error) = 0;
+	virtual void onError(ClientError error) = 0;
 
 	void VIL_API start();
 

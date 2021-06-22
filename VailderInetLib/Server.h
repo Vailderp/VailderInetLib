@@ -7,7 +7,6 @@
 #include <map>
 #include <vector>
 #include <WinSock2.h>
-
 #include "Packet.h"
 #include "Socket.h"
 #include "States.h"
@@ -17,9 +16,13 @@
 _VIL_BEGIN
 enum class ServerError
 {
-	SOCKET_CONNECTED,
+	SOCKET_CONNECT,
 	SERVER_INIT
 };
+_VIL_END
+
+_VIL_BEGIN
+using exception_socket_void = std::function<bool(const Socket&)>;
 _VIL_END
 
 _VIL_BEGIN
@@ -49,14 +52,14 @@ public:
 	virtual void onError(ServerError error) = 0;
 
 	void VIL_API start();
+
+	void VIL_API emitTo(packetc_t packet, const Socket& to_socket) const;
 	
 	void VIL_API emit(packetc_t packet) const;
 
-	void VIL_API emit(packetc_t packet, const Socket& exception_socket);
+	void VIL_API emitExc(packetc_t packet, const Socket& exception_socket);
 
-	void VIL_API emit(packetc_t packet, DWORD delay) const;
-
-	void VIL_API emit(packetc_t packet, const Socket& exception_socket, DWORD delay);
+	void VIL_API emit(packetc_t packet, const exception_socket_void exception_socket_void);
 
 	void VIL_API disconnectSocket(const Socket& socket);
 	

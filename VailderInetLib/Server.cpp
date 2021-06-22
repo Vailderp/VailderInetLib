@@ -45,14 +45,14 @@ void vil::Server::start()
 
 		if (socket_connection == 0)
 		{
-			onError(ServerError::SOCKET_CONNECTED);
+			onError(ServerError::SOCKET_CONNECT);
 		}
 		else
 		{
-
 			connections_[l] = socket_connection;
 			n_connections_++;
-
+			sockets_[l] = Socket(&connections_[l], l);
+			
 			std::thread* thread = new std::thread(
 				[&, l]()
 				{
@@ -73,6 +73,7 @@ void vil::Server::start()
 								}
 								else
 								{
+									delete[] packet;
 									break;
 								}
 							}
@@ -90,43 +91,44 @@ void vil::Server::start()
 	}
 }
 
+void _VIL Server::emitTo(const packetc_t packet, const Socket& to_socket) const
+{
+	int sizeof_packet = static_cast<int>(strlen(packet));
+	send(*to_socket.connection_, enpack(&sizeof_packet), sizeof(int), NULL);
+	send(*to_socket.connection_, packet, sizeof_packet, NULL);
+}
+
 void _VIL Server::emit(const packetc_t packet) const
 {
 	if (!this->paused)
 	{
-		int sizeof_packet = static_cast<int>(strlen(packet));
-		for (int i = 0; i < n_connections_; i++)
+		for (const auto& socket : sockets_)
 		{
-			send(connections_[i], enpack(&sizeof_packet), sizeof(int), NULL);
-			send(connections_[i], packet, sizeof_packet, NULL);
+			emitTo(packet, socket.second);
 		}
 	}
 }
 
-void _VIL Server::emit(const packetc_t packet, const Socket& exception_socket)
+void _VIL Server::emitExc(const packetc_t packet, const Socket& exception_socket)
 {
-	int sizeof_packet = static_cast<int>(strlen(packet));
-	for (int i = 0; i < n_connections_; i++)
+	for (const auto& socket : sockets_) 
 	{
-		if (sockets_[i].index == exception_socket.index)
+		if (socket.second.index != exception_socket.index)
 		{
-			continue;
+			emitTo(packet, socket.second);
 		}
-		send(connections_[i], enpack(&sizeof_packet), sizeof(int), NULL);
-		send(connections_[i], packet, sizeof_packet, NULL);
 	}
 }
 
-void _VIL Server::emit(const packetc_t packet, const DWORD delay) const
+void _VIL Server::emit(const packetc_t packet, const _VIL exception_socket_void exception_socket_void) 
 {
-	emit(packet);
-	Sleep(delay);
-}
-
-void _VIL Server::emit(const packetc_t packet, const Socket& exception_socket, const DWORD delay) 
-{
-	emit(packet, exception_socket);
-	Sleep(delay);
+	for (const auto& socket : sockets_)
+	{
+		if (exception_socket_void(socket.second))
+		{
+			emitTo(packet, socket.second);
+		}
+	}
 }
 
 void _VIL Server::disconnectSocket(const Socket& socket)

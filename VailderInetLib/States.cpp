@@ -13,6 +13,7 @@ _VIL States::States(const bool stopped,
 vil::StatesDynamic::StatesDynamic(const States states):
 	_VIL States(states)
 {
+	
 }
 
 void vil::StatesDynamic::stop(const bool stopped)
@@ -20,7 +21,7 @@ void vil::StatesDynamic::stop(const bool stopped)
 	this->stopped = stopped;
 }
 
-void vil::StatesDynamic::mute(const bool mute)
+void vil::StatesDynamic::mute(const bool muted)
 {
 	this->muted = muted;
 }
